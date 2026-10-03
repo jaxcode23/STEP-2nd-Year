@@ -147,17 +147,13 @@ public class AccountRulesEngine {
     }
     
     public double getDailyTransferLimit(String accountType, int tenureYears) {
-        // ============================================================
-        // 📝 STEP 8: Implement getDailyTransferLimit()
-        //
-        // INSTRUCTIONS:
-        //   1. Call getAdditionalFeature(accountType, tenureYears, "dailyTransferLimit").
-        //   2. If the result is null, return 0.0.
-        //   3. Otherwise cast it to Double and return it.
-        //
-        // HINT: The properties loader stores every daily.transfer.limit.* value as a Double under the key "dailyTransferLimit".
-        // ============================================================
-        // TODO: delegate to getAdditionalFeature(accountType, tenureYears, "dailyTransferLimit"), cast to Double, return 0.0 if null
+        Object val = getAdditionalFeature(accountType, tenureYears, "dailyTransferLimit");
+        if (val == null) {
+            return 0.0;
+        }
+        if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        }
         return 0.0;
     }
 

@@ -125,71 +125,30 @@ public abstract class Account implements IAccount {
     @Override public void setTenureYears(int tenureYears) { this.tenureYears = Math.max(0, tenureYears); }
 
     public double getDailyTransferLimit() {
-        // ============================================================
-        // 📝 STEP 3: Get Daily Transfer Limit
-        //
-        // INSTRUCTIONS:
-        //   1. Ask the rules engine for this account's limit:
-        //      AccountRulesEngine.getInstance().getDailyTransferLimit(getAccountType(), getTenureYears()).
-        //   2. Return that value.
-        //
-        // HINT: The limit depends on account type and tenure bucket, e.g. a NEW Savings account gets Rs. 50,000.
-        // ============================================================
-        // TODO: return the daily transfer limit from the rules engine
-        return 0.0;
+        return AccountRulesEngine.getInstance().getDailyTransferLimit(getAccountType(), getTenureYears());
     }
 
     public double getRemainingDailyTransferLimit() {
-        // ============================================================
-        // 📝 STEP 4: Get Remaining Daily Limit
-        //
-        // INSTRUCTIONS:
-        //   1. Call resetDailyTransferIfNeeded() so yesterday's transfers are not counted.
-        //   2. Return getDailyTransferLimit() - dailyTransferTotal, but never less than 0.
-        //
-        // HINT: Math.max(0.0, ...) keeps the result from going negative.
-        // ============================================================
-        // TODO: return how much can still be transferred today
-        return 0.0;
+        resetDailyTransferIfNeeded();
+        return Math.max(0.0, getDailyTransferLimit() - dailyTransferTotal);
     }
 
     public boolean canTransfer(double amount) {
-        // ============================================================
-        // 📝 STEP 5: Check Amount Against Daily Limit
-        //
-        // INSTRUCTIONS:
-        //   1. Call resetDailyTransferIfNeeded().
-        //   2. Return true if dailyTransferTotal + amount <= getDailyTransferLimit(), otherwise false.
-        //
-        // HINT: A limit of 0 (Fixed Deposit) must block every transfer.
-        // ============================================================
-        // TODO: return whether this amount fits within today's limit
-        return false;
+        resetDailyTransferIfNeeded();
+        return dailyTransferTotal + amount <= getDailyTransferLimit();
     }
 
     public void updateDailyTransferTotal(double amount) {
-        // ============================================================
-        // 📝 STEP 6: Record A Completed Transfer
-        //
-        // INSTRUCTIONS:
-        //   1. Call resetDailyTransferIfNeeded().
-        //   2. Add amount to dailyTransferTotal.
-        //   3. Set lastTransferDate to LocalDateTime.now().
-        // ============================================================
-        // TODO: add the amount to today's running total
+        resetDailyTransferIfNeeded();
+        dailyTransferTotal += amount;
+        lastTransferDate = LocalDateTime.now();
     }
 
     public void resetDailyTransferIfNeeded() {
-        // ============================================================
-        // 📝 STEP 7: Reset The Total On A New Day
-        //
-        // INSTRUCTIONS:
-        //   1. Compare lastTransferDate.toLocalDate() with LocalDateTime.now().toLocalDate().
-        //   2. If they differ, set dailyTransferTotal to 0.0 and lastTransferDate to LocalDateTime.now().
-        //
-        // HINT: Compare dates, not date-times — two transfers an hour apart are still on the same day.
-        // ============================================================
-        // TODO: reset the daily total when the calendar day has changed
+        if (lastTransferDate == null || !lastTransferDate.toLocalDate().equals(LocalDateTime.now().toLocalDate())) {
+            dailyTransferTotal = 0.0;
+            lastTransferDate = LocalDateTime.now();
+        }
     }
 
     public double getDailyTransferTotal() { return dailyTransferTotal; }
