@@ -1,0 +1,6 @@
+*.class
+bin/
+.java-build/
+.vscode/
+.idea/
+*.log
