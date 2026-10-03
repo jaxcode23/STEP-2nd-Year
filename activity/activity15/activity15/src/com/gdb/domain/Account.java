@@ -24,9 +24,7 @@ public abstract class Account implements IAccount {
     //   1. dailyTransferTotal holds the sum of all transfers sent today (starts at 0.0).
     //   2. lastTransferDate records when that total was last updated (starts at now).
     //
-    // HINT: These are declared for you because the getters below need them to compile; Steps 4-7 read and update them.
-    // ============================================================
-    // TODO: study these two fields — every daily-limit method in Steps 4-7 works with them
+    // Daily-limit tracking fields used by transfer limit validation methods
     protected double dailyTransferTotal = 0.0;
     protected LocalDateTime lastTransferDate = LocalDateTime.now();
 

@@ -11,7 +11,6 @@ public class TestTransfer {
         System.out.println("=".repeat(60));
 
         TransferService svc = new TransferService();
-        AccountRulesEngine engine = AccountRulesEngine.getInstance();
 
         // STEP 9: Create Two Accounts And Set PIN
         Account acc1 = (Account) AccountFactory.createAccount("SAVINGS", 1001, "Rajesh Sharma", 30, 100000);
