@@ -1,6 +1,5 @@
 package com.gdb.domain;
 
-import com.gdb.exceptions.*;
 
 public class SavingsAccount extends Account {
     private double minBalance = 1000.0;
