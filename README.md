@@ -55,7 +55,8 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `5eaab79` | `chore: isolate activity modules with Eclipse and VS Code project configuration` | **Tooling** | Eclipse `.project` / `.classpath` metadata and VS Code workspace configuration |
 | `f39c9c9` | `feat(activity16): complete Activity 16 transaction model and audit records` | **Activity 16** | Immutable `Transaction` model, `TransactionType` enum, and overloaded audit methods |
 | `bbc11dd` | `feat(activity17): complete Activity 17 command pattern and file logging` | **Activity 17** | Command Pattern (`TransactionCommand`), serialized audit log (`TransactionLog`) |
-| `HEAD` | `feat(activity18): complete Activity 18 bridge pattern logging` | **Activity 18** | **Bridge Pattern** decoupling `TransactionLogger` abstraction from File, DB, and Memory implementors |
+| `c3c79ee` | `feat(activity18): complete Activity 18 bridge pattern logging` | **Activity 18** | **Bridge Pattern** decoupling `TransactionLogger` abstraction from File, DB, and Memory implementors |
+| `HEAD` | `feat(activity19): complete Activity 19 account service orchestrator` | **Activity 19** | Unified `AccountService` application layer coordinating commands, accounts, and logging |
 
 ---
 
@@ -173,7 +174,7 @@ STEP-2nd-Year/
         ├── src/com/gdb/logging/TransactionLog.java # ObjectOutputStream binary file logger
         └── src/com/gdb/tests/TestCommandLogging.java # Replay & persistence verification suite
     │
-    └── activity18/activity18/                # Activity 18: Bridge Pattern (File + DB)
+    ├── activity18/activity18/                # Activity 18: Bridge Pattern (File + DB)
         ├── docs/ACTIVITY_18.md               # Activity 18 specification
         ├── src/com/gdb/logging/LogDestination.java # Bridge implementor contract
         ├── src/com/gdb/logging/TransactionLogger.java # Bridge abstraction
@@ -181,6 +182,12 @@ STEP-2nd-Year/
         ├── src/com/gdb/logging/DatabaseLogDestination.java # Database log implementor
         ├── src/com/gdb/logging/MemoryLogDestination.java # In-memory implementor
         └── src/com/gdb/tests/TestBridgeLogging.java # Multi-backend isolation test suite
+    │
+    └── activity19/activity19/                # Activity 19: AccountService (Service Layer)
+        ├── docs/ACTIVITY_19.md               # Activity 19 specification
+        ├── src/com/gdb/service/AccountService.java # Unified orchestration service
+        ├── src/com/gdb/Main.java             # Entry point & bootstrap workflow
+        └── src/com/gdb/tests/TestAccountService.java # Comprehensive service testing suite
 ```
 
 ---
@@ -226,7 +233,8 @@ $activities = @(
     @{ Name="Activity 15"; Src="activity/activity15/activity15/src"; Bin="activity/activity15/activity15/bin"; CP="activity/activity15/activity15/bin;activity/activity15/activity15"; Main="com.gdb.tests.TestTransfer" },
     @{ Name="Activity 16"; Src="activity/activity16/activity16/src"; Bin="activity/activity16/activity16/bin"; CP="activity/activity16/activity16/bin;activity/activity16/activity16"; Main="com.gdb.tests.TestTransactionModel" },
     @{ Name="Activity 17"; Src="activity/activity17/activity17/src"; Bin="activity/activity17/activity17/bin"; CP="activity/activity17/activity17/bin;activity/activity17/activity17"; Main="com.gdb.tests.TestCommandLogging" },
-    @{ Name="Activity 18"; Src="activity/activity18/activity18/src"; Bin="activity/activity18/activity18/bin"; CP="activity/activity18/activity18/bin;activity/activity18/activity18"; Main="com.gdb.tests.TestBridgeLogging" }
+    @{ Name="Activity 18"; Src="activity/activity18/activity18/src"; Bin="activity/activity18/activity18/bin"; CP="activity/activity18/activity18/bin;activity/activity18/activity18"; Main="com.gdb.tests.TestBridgeLogging" },
+    @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" }
 )
 
 foreach ($act in $activities) {
@@ -273,6 +281,8 @@ compile_and_run "Activity 15" "activity/activity15/activity15/src" "activity/act
 compile_and_run "Activity 16" "activity/activity16/activity16/src" "activity/activity16/activity16/bin" "activity/activity16/activity16/bin:activity/activity16/activity16" "com.gdb.tests.TestTransactionModel"
 compile_and_run "Activity 17" "activity/activity17/activity17/src" "activity/activity17/activity17/bin" "activity/activity17/activity17/bin:activity/activity17/activity17" "com.gdb.tests.TestCommandLogging"
 compile_and_run "Activity 18" "activity/activity18/activity18/src" "activity/activity18/activity18/bin" "activity/activity18/activity18/bin:activity/activity18/activity18" "com.gdb.tests.TestBridgeLogging"
+compile_and_run "Activity 19" "activity/activity19/activity19/src" "activity/activity19/activity19/bin" "activity/activity19/activity19/bin:activity/activity19/activity19" "com.gdb.tests.TestAccountService"
+
 
 
 
@@ -454,6 +464,16 @@ Enter your choice:
 
 ---
 
+### 🏛️ Activity 19 — AccountService (Service Layer Orchestrator)
+- **Directory:** `activity/activity19/activity19/`
+- **Key Concepts:**
+  - `AccountService`: Single point of orchestration managing the lifecycle of banking entities, in-memory accounts map, and sequential account number generation.
+  - **Command Encapsulation:** Transforms raw inputs into concrete `DepositCommand`, `WithdrawCommand`, and `TransferCommand` objects before delegating to `TransactionLogger`.
+  - **Simplified Client Interface:** Clients interact solely with `service.openAccount()`, `service.deposit()`, `service.withdraw()`, `service.transfer()`, and `service.closeAccount()`.
+- **Test Class:** `com.gdb.tests.TestAccountService`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -467,6 +487,7 @@ Enter your choice:
 | **Audit Log / Value Object Pattern** | `Transaction` + `TransactionType` | Captures immutable historical snapshots of financial operations for compliance and reconciliation. |
 | **Command Pattern** | `TransactionCommand`, `DepositCommand`, etc. | Encapsulates financial operations as standalone executable objects enabling replay, undo, and decoupled logging. |
 | **Bridge Pattern** | `TransactionLogger` + `LogDestination` hierarchy | Decouples logging abstraction from storage engines, allowing hot-swapping between File, DB, and Memory. |
+| **Application Service Orchestrator** | `AccountService` | Unifies domain operations and infrastructure logging behind a clean transactional facade. |
 
 ---
 
