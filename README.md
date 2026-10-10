@@ -56,7 +56,8 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `f39c9c9` | `feat(activity16): complete Activity 16 transaction model and audit records` | **Activity 16** | Immutable `Transaction` model, `TransactionType` enum, and overloaded audit methods |
 | `bbc11dd` | `feat(activity17): complete Activity 17 command pattern and file logging` | **Activity 17** | Command Pattern (`TransactionCommand`), serialized audit log (`TransactionLog`) |
 | `c3c79ee` | `feat(activity18): complete Activity 18 bridge pattern logging` | **Activity 18** | **Bridge Pattern** decoupling `TransactionLogger` abstraction from File, DB, and Memory implementors |
-| `HEAD` | `feat(activity19): complete Activity 19 account service orchestrator` | **Activity 19** | Unified `AccountService` application layer coordinating commands, accounts, and logging |
+| `5dfc105` | `feat(activity19): complete Activity 19 account service orchestrator` | **Activity 19** | Unified `AccountService` application layer coordinating commands, accounts, and logging |
+| `HEAD` | `feat(activity20): complete Activity 20 interactive console application` | **Activity 20** | Interactive menu-driven console UI (`AccountUI`) decoupled from domain logic |
 
 ---
 
@@ -183,11 +184,17 @@ STEP-2nd-Year/
         ├── src/com/gdb/logging/MemoryLogDestination.java # In-memory implementor
         └── src/com/gdb/tests/TestBridgeLogging.java # Multi-backend isolation test suite
     │
-    └── activity19/activity19/                # Activity 19: AccountService (Service Layer)
+    ├── activity19/activity19/                # Activity 19: AccountService (Service Layer)
         ├── docs/ACTIVITY_19.md               # Activity 19 specification
         ├── src/com/gdb/service/AccountService.java # Unified orchestration service
         ├── src/com/gdb/Main.java             # Entry point & bootstrap workflow
         └── src/com/gdb/tests/TestAccountService.java # Comprehensive service testing suite
+    │
+    └── activity20/activity20/                # Activity 20: AccountUI (Interactive Console Application)
+        ├── docs/ACTIVITY_20.md               # Activity 20 specification
+        ├── src/com/gdb/ui/AccountUI.java     # Interactive console UI layer
+        ├── src/com/gdb/Main.java             # Entry point bootstrapping UI with file logging
+        └── src/com/gdb/tests/TestAccountUI.java # Test suite for UI operations
 ```
 
 ---
@@ -234,7 +241,8 @@ $activities = @(
     @{ Name="Activity 16"; Src="activity/activity16/activity16/src"; Bin="activity/activity16/activity16/bin"; CP="activity/activity16/activity16/bin;activity/activity16/activity16"; Main="com.gdb.tests.TestTransactionModel" },
     @{ Name="Activity 17"; Src="activity/activity17/activity17/src"; Bin="activity/activity17/activity17/bin"; CP="activity/activity17/activity17/bin;activity/activity17/activity17"; Main="com.gdb.tests.TestCommandLogging" },
     @{ Name="Activity 18"; Src="activity/activity18/activity18/src"; Bin="activity/activity18/activity18/bin"; CP="activity/activity18/activity18/bin;activity/activity18/activity18"; Main="com.gdb.tests.TestBridgeLogging" },
-    @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" }
+    @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" },
+    @{ Name="Activity 20"; Src="activity/activity20/activity20/src"; Bin="activity/activity20/activity20/bin"; CP="activity/activity20/activity20/bin;activity/activity20/activity20"; Main="com.gdb.tests.TestAccountUI" }
 )
 
 foreach ($act in $activities) {
@@ -282,6 +290,7 @@ compile_and_run "Activity 16" "activity/activity16/activity16/src" "activity/act
 compile_and_run "Activity 17" "activity/activity17/activity17/src" "activity/activity17/activity17/bin" "activity/activity17/activity17/bin:activity/activity17/activity17" "com.gdb.tests.TestCommandLogging"
 compile_and_run "Activity 18" "activity/activity18/activity18/src" "activity/activity18/activity18/bin" "activity/activity18/activity18/bin:activity/activity18/activity18" "com.gdb.tests.TestBridgeLogging"
 compile_and_run "Activity 19" "activity/activity19/activity19/src" "activity/activity19/activity19/bin" "activity/activity19/activity19/bin:activity/activity19/activity19" "com.gdb.tests.TestAccountService"
+compile_and_run "Activity 20" "activity/activity20/activity20/src" "activity/activity20/activity20/bin" "activity/activity20/activity20/bin:activity/activity20/activity20" "com.gdb.tests.TestAccountUI"
 
 
 
@@ -474,6 +483,16 @@ Enter your choice:
 
 ---
 
+### 🖥️ Activity 20 — AccountUI (Interactive Console Application)
+- **Directory:** `activity/activity20/activity20/`
+- **Key Concepts:**
+  - `AccountUI`: Presentation layer offering an 8-option terminal menu (`Open Account`, `Deposit`, `Withdraw`, `Transfer`, `Close Account`, `View Account`, `Transaction History`, `Exit`).
+  - **Model-View Separation:** The UI interacts solely with `AccountService` and handles input formatting, error display, and defensive retry loops without business logic leaks.
+  - `Main.java`: Dependency injection bootstrap wiring `FileLogDestination` → `TransactionLogger` → `AccountService` → `AccountUI`.
+- **Test Class:** `com.gdb.tests.TestAccountUI`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -488,6 +507,7 @@ Enter your choice:
 | **Command Pattern** | `TransactionCommand`, `DepositCommand`, etc. | Encapsulates financial operations as standalone executable objects enabling replay, undo, and decoupled logging. |
 | **Bridge Pattern** | `TransactionLogger` + `LogDestination` hierarchy | Decouples logging abstraction from storage engines, allowing hot-swapping between File, DB, and Memory. |
 | **Application Service Orchestrator** | `AccountService` | Unifies domain operations and infrastructure logging behind a clean transactional facade. |
+| **Presentation / CLI View Pattern** | `AccountUI` | Decouples terminal I/O and user interaction from core domain and service logic. |
 
 ---
 
