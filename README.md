@@ -53,6 +53,7 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `c41f459` | `feat(activity14): complete Activity 14 external properties rules engine` | **Activity 14** | External `.properties` file loader, configuration externalization, and runtime hot reload |
 | `bf6fab1` | `feat(activity15): complete Activity 15 funds transfer with daily limits` | **Activity 15** | Transactional `TransferService`, daily transfer limit tracking, and atomic rollback |
 | `5eaab79` | `chore: isolate activity modules with Eclipse and VS Code project configuration` | **Tooling** | Eclipse `.project` / `.classpath` metadata and VS Code workspace configuration |
+| `HEAD` | `feat(activity16): complete Activity 16 transaction model and audit records` | **Activity 16** | Immutable `Transaction` model, `TransactionType` enum, and overloaded audit methods |
 
 ---
 
@@ -154,6 +155,15 @@ STEP-2nd-Year/
         ├── src/com/gdb/domain/AccountRulesEngine.java
         ├── src/com/gdb/tests/TestTransfer.java # Transfer, limits & rollback test suite
         └── src/com/gdb/tests/TestAccountRulesEngineProperties.java
+    │
+    └── activity16/activity16/                # Activity 16: Transaction Model
+        ├── docs/ACTIVITY_16.md               # Activity 16 specification
+        ├── src/main/resources/config/rules/  # Properties configuration files
+        ├── src/com/gdb/domain/Transaction.java # Immutable transaction audit record
+        ├── src/com/gdb/domain/TransactionType.java # DEPOSIT, WITHDRAW, TRANSFER enum
+        ├── src/com/gdb/domain/Account.java   # depositWithTransaction & withdrawWithTransaction
+        ├── src/com/gdb/service/TransferService.java # transferWithTransaction
+        └── src/com/gdb/tests/TestTransactionModel.java # Transaction model test suite
 ```
 
 ---
@@ -196,7 +206,8 @@ $activities = @(
     @{ Name="Activity 13.1"; Src="activity/activity13/activity13/13.1/src"; Bin="activity/activity13/activity13/13.1/bin"; Main="com.gdb.tests.TestAccountRulesEngine" },
     @{ Name="Activity 13.2"; Src="activity/activity13/activity13/13.2/src"; Bin="activity/activity13/activity13/13.2/bin"; Main="com.gdb.tests.TestAccountRulesEngine" },
     @{ Name="Activity 14"; Src="activity/activity14/activity14/src"; Bin="activity/activity14/activity14/bin"; CP="activity/activity14/activity14/bin;activity/activity14/activity14"; Main="com.gdb.tests.TestAccountRulesEngineProperties" },
-    @{ Name="Activity 15"; Src="activity/activity15/activity15/src"; Bin="activity/activity15/activity15/bin"; CP="activity/activity15/activity15/bin;activity/activity15/activity15"; Main="com.gdb.tests.TestTransfer" }
+    @{ Name="Activity 15"; Src="activity/activity15/activity15/src"; Bin="activity/activity15/activity15/bin"; CP="activity/activity15/activity15/bin;activity/activity15/activity15"; Main="com.gdb.tests.TestTransfer" },
+    @{ Name="Activity 16"; Src="activity/activity16/activity16/src"; Bin="activity/activity16/activity16/bin"; CP="activity/activity16/activity16/bin;activity/activity16/activity16"; Main="com.gdb.tests.TestTransactionModel" }
 )
 
 foreach ($act in $activities) {
@@ -240,6 +251,8 @@ compile_and_run "Activity 13.1" "activity/activity13/activity13/13.1/src" "activ
 compile_and_run "Activity 13.2" "activity/activity13/activity13/13.2/src" "activity/activity13/activity13/13.2/bin" "activity/activity13/activity13/13.2/bin" "com.gdb.tests.TestAccountRulesEngine"
 compile_and_run "Activity 14" "activity/activity14/activity14/src" "activity/activity14/activity14/bin" "activity/activity14/activity14/bin:activity/activity14/activity14" "com.gdb.tests.TestAccountRulesEngineProperties"
 compile_and_run "Activity 15" "activity/activity15/activity15/src" "activity/activity15/activity15/bin" "activity/activity15/activity15/bin:activity/activity15/activity15" "com.gdb.tests.TestTransfer"
+compile_and_run "Activity 16" "activity/activity16/activity16/src" "activity/activity16/activity16/bin" "activity/activity16/activity16/bin:activity/activity16/activity16" "com.gdb.tests.TestTransactionModel"
+
 ```
 
 #### 3. How to Run an Individual Activity (e.g. Activity 15)
@@ -385,6 +398,16 @@ Enter your choice:
 
 ---
 
+### 📝 Activity 16 — Transaction Model & Audit Records
+- **Directory:** `activity/activity16/activity16/`
+- **Key Concepts:**
+  - `Transaction`: Immutable, serializable audit record capturing `transactionId`, `timestamp`, `accountNumber`, `type`, `amount`, `balanceAfter`, `status`, `description`, `fromAccount`, `toAccount`.
+  - `TransactionType`: Enum representing supported money movements (`DEPOSIT`, `WITHDRAW`, `TRANSFER`).
+  - **Overloaded Audit Methods:** `depositWithTransaction` and `withdrawWithTransaction` on `Account`, and `transferWithTransaction` on `TransferService`, retaining 100% backward compatibility with legacy void methods.
+- **Test Class:** `com.gdb.tests.TestTransactionModel`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -395,6 +418,7 @@ Enter your choice:
 | **Strategy / Rules Engine Pattern** | `AccountRulesEngine` + `Rule` tiers | Separates business policy (interest rates, minimum balances, daily limits) from domain entities. |
 | **Externalized Configuration** | `.properties` files + `AccountRulesPropertiesLoader` | Allows business teams to alter banking policy and limits without source code modifications. |
 | **Service Layer Pattern** | `TransferService` | Encapsulates multi-entity transactional workflows (atomic transfer, audit logging, rollback recovery). |
+| **Audit Log / Value Object Pattern** | `Transaction` + `TransactionType` | Captures immutable historical snapshots of financial operations for compliance and reconciliation. |
 
 ---
 
