@@ -57,7 +57,8 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `bbc11dd` | `feat(activity17): complete Activity 17 command pattern and file logging` | **Activity 17** | Command Pattern (`TransactionCommand`), serialized audit log (`TransactionLog`) |
 | `c3c79ee` | `feat(activity18): complete Activity 18 bridge pattern logging` | **Activity 18** | **Bridge Pattern** decoupling `TransactionLogger` abstraction from File, DB, and Memory implementors |
 | `5dfc105` | `feat(activity19): complete Activity 19 account service orchestrator` | **Activity 19** | Unified `AccountService` application layer coordinating commands, accounts, and logging |
-| `HEAD` | `feat(activity20): complete Activity 20 interactive console application` | **Activity 20** | Interactive menu-driven console UI (`AccountUI`) decoupled from domain logic |
+| `46edc91` | `feat(activity20): complete Activity 20 interactive console application` | **Activity 20** | Interactive menu-driven console UI (`AccountUI`) decoupled from domain logic |
+| `HEAD` | `feat(activity21): complete Activity 21 in-memory repository pattern` | **Activity 21** | Repository pattern interfaces, in-memory collection backends, and configurable `RepositoryFactory` |
 
 ---
 
@@ -190,11 +191,18 @@ STEP-2nd-Year/
         ├── src/com/gdb/Main.java             # Entry point & bootstrap workflow
         └── src/com/gdb/tests/TestAccountService.java # Comprehensive service testing suite
     │
-    └── activity20/activity20/                # Activity 20: AccountUI (Interactive Console Application)
+    ├── activity20/activity20/                # Activity 20: AccountUI (Interactive Console Application)
         ├── docs/ACTIVITY_20.md               # Activity 20 specification
         ├── src/com/gdb/ui/AccountUI.java     # Interactive console UI layer
         ├── src/com/gdb/Main.java             # Entry point bootstrapping UI with file logging
         └── src/com/gdb/tests/TestAccountUI.java # Test suite for UI operations
+    │
+    └── activity21/activity21/                # Activity 21: Repository Pattern (InMemory + Factory)
+        ├── docs/ACTIVITY_21.md               # Activity 21 specification
+        ├── src/com/gdb/repository/           # AccountRepository, TransactionRepository, InMemory implementations
+        ├── src/com/gdb/repository/RepositoryFactory.java # Configurable repository factory
+        ├── src/main/resources/config/persistence.properties # Persistence mode configuration
+        └── src/com/gdb/tests/TestRepositoryInMemory.java # In-memory repository & service test suite
 ```
 
 ---
@@ -242,7 +250,8 @@ $activities = @(
     @{ Name="Activity 17"; Src="activity/activity17/activity17/src"; Bin="activity/activity17/activity17/bin"; CP="activity/activity17/activity17/bin;activity/activity17/activity17"; Main="com.gdb.tests.TestCommandLogging" },
     @{ Name="Activity 18"; Src="activity/activity18/activity18/src"; Bin="activity/activity18/activity18/bin"; CP="activity/activity18/activity18/bin;activity/activity18/activity18"; Main="com.gdb.tests.TestBridgeLogging" },
     @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" },
-    @{ Name="Activity 20"; Src="activity/activity20/activity20/src"; Bin="activity/activity20/activity20/bin"; CP="activity/activity20/activity20/bin;activity/activity20/activity20"; Main="com.gdb.tests.TestAccountUI" }
+    @{ Name="Activity 20"; Src="activity/activity20/activity20/src"; Bin="activity/activity20/activity20/bin"; CP="activity/activity20/activity20/bin;activity/activity20/activity20"; Main="com.gdb.tests.TestAccountUI" },
+    @{ Name="Activity 21"; Src="activity/activity21/activity21/src"; Bin="activity/activity21/activity21/bin"; CP="activity/activity21/activity21/bin;activity/activity21/activity21/src/main/resources"; Main="com.gdb.tests.TestRepositoryInMemory" }
 )
 
 foreach ($act in $activities) {
@@ -291,6 +300,7 @@ compile_and_run "Activity 17" "activity/activity17/activity17/src" "activity/act
 compile_and_run "Activity 18" "activity/activity18/activity18/src" "activity/activity18/activity18/bin" "activity/activity18/activity18/bin:activity/activity18/activity18" "com.gdb.tests.TestBridgeLogging"
 compile_and_run "Activity 19" "activity/activity19/activity19/src" "activity/activity19/activity19/bin" "activity/activity19/activity19/bin:activity/activity19/activity19" "com.gdb.tests.TestAccountService"
 compile_and_run "Activity 20" "activity/activity20/activity20/src" "activity/activity20/activity20/bin" "activity/activity20/activity20/bin:activity/activity20/activity20" "com.gdb.tests.TestAccountUI"
+compile_and_run "Activity 21" "activity/activity21/activity21/src" "activity/activity21/activity21/bin" "activity/activity21/activity21/bin:activity/activity21/activity21/src/main/resources" "com.gdb.tests.TestRepositoryInMemory"
 
 
 
@@ -493,6 +503,17 @@ Enter your choice:
 
 ---
 
+### 📦 Activity 21 — Repository Pattern (Interfaces + InMemory + Factory)
+- **Directory:** `activity/activity21/activity21/`
+- **Key Concepts:**
+  - **Repository Abstraction:** `AccountRepository` and `TransactionRepository` interfaces completely isolate domain entities and services from persistence technologies.
+  - **In-Memory Implementations:** `InMemoryAccountRepository` (indexed map storage with synchronized sequential ID generator starting at 1001) and `InMemoryTransactionRepository` (historical list ledger with account-based query filtering).
+  - **Pluggable Factory:** `RepositoryFactory` parses `config/persistence.properties` (`memory`, with future extensibility for `jdbc` and `file`) and provides cached repository singletons.
+  - **Decoupled Service Layer:** `AccountService` constructor accepts repository dependencies, enabling effortless mock injection and alternative storage backends.
+- **Test Class:** `com.gdb.tests.TestRepositoryInMemory`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -508,6 +529,7 @@ Enter your choice:
 | **Bridge Pattern** | `TransactionLogger` + `LogDestination` hierarchy | Decouples logging abstraction from storage engines, allowing hot-swapping between File, DB, and Memory. |
 | **Application Service Orchestrator** | `AccountService` | Unifies domain operations and infrastructure logging behind a clean transactional facade. |
 | **Presentation / CLI View Pattern** | `AccountUI` | Decouples terminal I/O and user interaction from core domain and service logic. |
+| **Repository Pattern** | `AccountRepository` + `TransactionRepository` | Completely abstracts data access and storage mechanisms from business services and domain logic. |
 
 ---
 
