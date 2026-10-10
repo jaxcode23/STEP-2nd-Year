@@ -4,7 +4,6 @@ import com.gdb.domain.IAccount;
 import com.gdb.domain.Transaction;
 import com.gdb.command.TransactionCommand;
 import com.gdb.service.AccountService;
-import com.gdb.exceptions.AccountException;
 
 import java.util.*;
 
@@ -116,7 +115,7 @@ public class AccountUI {
         int toAcc = readInt("To Account: ");
         double amount = readDouble("Amount: ");
         int pin = readInt("PIN: ");
-        Transaction txn = service.transfer(fromAcc, toAcc, amount, pin);
+        service.transfer(fromAcc, toAcc, amount, pin);
         System.out.println("SUCCESS: Transferred Rs. " + amount + " from #" + fromAcc + " to #" + toAcc);
     }
 

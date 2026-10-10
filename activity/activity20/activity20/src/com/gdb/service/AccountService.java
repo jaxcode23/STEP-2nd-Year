@@ -104,4 +104,8 @@ public class AccountService {
     public int getNextAccountNumber() {
         return nextAccountNumber;
     }
+
+    public TransferService getTransferService() {
+        return transferService;
+    }
 }

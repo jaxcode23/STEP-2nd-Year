@@ -4,7 +4,6 @@ import com.gdb.command.*;
 import com.gdb.db.SimulatedDatabase;
 import com.gdb.domain.*;
 import com.gdb.logging.*;
-import java.util.List;
 
 public class TestBridgeLogging {
     public static void main(String[] args) throws Exception {

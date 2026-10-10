@@ -2,7 +2,6 @@ package com.gdb.tests;
 
 import com.gdb.domain.*;
 import com.gdb.service.TransferService;
-import com.gdb.exceptions.*;
 
 public class TestTransactionModel {
     public static void main(String[] args) throws Exception {

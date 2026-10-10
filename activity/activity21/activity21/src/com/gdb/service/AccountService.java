@@ -145,4 +145,8 @@ public class AccountService {
     public List<IAccount> getAllAccounts() {
         return accountRepository != null ? accountRepository.findAll() : Collections.emptyList();
     }
+
+    public TransferService getTransferService() {
+        return transferService;
+    }
 }
