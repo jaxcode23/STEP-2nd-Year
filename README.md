@@ -58,7 +58,8 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `c3c79ee` | `feat(activity18): complete Activity 18 bridge pattern logging` | **Activity 18** | **Bridge Pattern** decoupling `TransactionLogger` abstraction from File, DB, and Memory implementors |
 | `5dfc105` | `feat(activity19): complete Activity 19 account service orchestrator` | **Activity 19** | Unified `AccountService` application layer coordinating commands, accounts, and logging |
 | `46edc91` | `feat(activity20): complete Activity 20 interactive console application` | **Activity 20** | Interactive menu-driven console UI (`AccountUI`) decoupled from domain logic |
-| `HEAD` | `feat(activity21): complete Activity 21 in-memory repository pattern` | **Activity 21** | Repository pattern interfaces, in-memory collection backends, and configurable `RepositoryFactory` |
+| `1d0f1b5` | `feat(activity21): complete Activity 21 in-memory repository pattern` | **Activity 21** | Repository pattern interfaces, in-memory collection backends, and configurable `RepositoryFactory` |
+| `f9cca78` | `feat(activity22): complete Activity 22 JDBC connection and schema initialization` | **Activity 22** | Relational SQLite JDBC connection management, schema initialization, and table DDL |
 
 ---
 
@@ -197,12 +198,21 @@ STEP-2nd-Year/
         ├── src/com/gdb/Main.java             # Entry point bootstrapping UI with file logging
         └── src/com/gdb/tests/TestAccountUI.java # Test suite for UI operations
     │
-    └── activity21/activity21/                # Activity 21: Repository Pattern (InMemory + Factory)
+    ├── activity21/activity21/                # Activity 21: Repository Pattern (InMemory + Factory)
         ├── docs/ACTIVITY_21.md               # Activity 21 specification
         ├── src/com/gdb/repository/           # AccountRepository, TransactionRepository, InMemory implementations
         ├── src/com/gdb/repository/RepositoryFactory.java # Configurable repository factory
         ├── src/main/resources/config/persistence.properties # Persistence mode configuration
         └── src/com/gdb/tests/TestRepositoryInMemory.java # In-memory repository & service test suite
+    │
+    └── activity22/activity22/                # Activity 22: JDBC Foundation (Connection + Schema)
+        ├── docs/ACTIVITY_22.md               # Activity 22 specification
+        ├── lib/                              # SQLite JDBC driver & SLF4J libraries
+        ├── src/com/gdb/db/ConnectionProvider.java # Connection acquisition contract
+        ├── src/com/gdb/db/JdbcConnectionProvider.java # SQLite DriverManager connection provider
+        ├── src/com/gdb/db/SchemaInitializer.java # DDL statement runner (schema.sql)
+        ├── src/main/resources/schema.sql     # Relational schema (accounts & transactions tables)
+        └── src/com/gdb/tests/TestJdbcConnection.java # Database connection & table verification suite
 ```
 
 ---
@@ -251,7 +261,8 @@ $activities = @(
     @{ Name="Activity 18"; Src="activity/activity18/activity18/src"; Bin="activity/activity18/activity18/bin"; CP="activity/activity18/activity18/bin;activity/activity18/activity18"; Main="com.gdb.tests.TestBridgeLogging" },
     @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" },
     @{ Name="Activity 20"; Src="activity/activity20/activity20/src"; Bin="activity/activity20/activity20/bin"; CP="activity/activity20/activity20/bin;activity/activity20/activity20"; Main="com.gdb.tests.TestAccountUI" },
-    @{ Name="Activity 21"; Src="activity/activity21/activity21/src"; Bin="activity/activity21/activity21/bin"; CP="activity/activity21/activity21/bin;activity/activity21/activity21/src/main/resources"; Main="com.gdb.tests.TestRepositoryInMemory" }
+    @{ Name="Activity 21"; Src="activity/activity21/activity21/src"; Bin="activity/activity21/activity21/bin"; CP="activity/activity21/activity21/bin;activity/activity21/activity21/src/main/resources"; Main="com.gdb.tests.TestRepositoryInMemory" },
+    @{ Name="Activity 22"; Src="activity/activity22/activity22/src"; Bin="activity/activity22/activity22/bin"; CompileCP="activity/activity22/activity22/lib/*"; CP="activity/activity22/activity22/bin;activity/activity22/activity22/lib/*;activity/activity22/activity22/src/main/resources"; Main="com.gdb.tests.TestJdbcConnection" }
 )
 
 foreach ($act in $activities) {
@@ -260,7 +271,11 @@ foreach ($act in $activities) {
     Write-Host "============================================================" -ForegroundColor Cyan
     if (-not (Test-Path $act.Bin)) { New-Item -ItemType Directory -Path $act.Bin | Out-Null }
     $files = Get-ChildItem -Path $act.Src -Recurse -Filter *.java | ForEach-Object { $_.FullName }
-    & javac -encoding UTF-8 -d $act.Bin $files
+    if ($act.CompileCP) {
+        & javac -encoding UTF-8 -d $act.Bin -cp $act.CompileCP $files
+    } else {
+        & javac -encoding UTF-8 -d $act.Bin $files
+    }
     $cp = if ($act.CP) { $act.CP } else { $act.Bin }
     & java -cp $cp $act.Main
 }
@@ -275,12 +290,17 @@ compile_and_run() {
     local bin="$3"
     local cp="$4"
     local main="$5"
+    local compile_cp="${6:-}"
 
     echo -e "\n============================================================"
     echo -e " Building & Running ${name}..."
     echo -e "============================================================"
     mkdir -p "${bin}"
-    javac -encoding UTF-8 -d "${bin}" $(find "${src}" -name "*.java")
+    if [ -n "${compile_cp}" ]; then
+        javac -encoding UTF-8 -d "${bin}" -cp "${compile_cp}" $(find "${src}" -name "*.java")
+    else
+        javac -encoding UTF-8 -d "${bin}" $(find "${src}" -name "*.java")
+    fi
     java -cp "${cp}" "${main}"
 }
 
@@ -301,6 +321,7 @@ compile_and_run "Activity 18" "activity/activity18/activity18/src" "activity/act
 compile_and_run "Activity 19" "activity/activity19/activity19/src" "activity/activity19/activity19/bin" "activity/activity19/activity19/bin:activity/activity19/activity19" "com.gdb.tests.TestAccountService"
 compile_and_run "Activity 20" "activity/activity20/activity20/src" "activity/activity20/activity20/bin" "activity/activity20/activity20/bin:activity/activity20/activity20" "com.gdb.tests.TestAccountUI"
 compile_and_run "Activity 21" "activity/activity21/activity21/src" "activity/activity21/activity21/bin" "activity/activity21/activity21/bin:activity/activity21/activity21/src/main/resources" "com.gdb.tests.TestRepositoryInMemory"
+compile_and_run "Activity 22" "activity/activity22/activity22/src" "activity/activity22/activity22/bin" "activity/activity22/activity22/bin:activity/activity22/activity22/lib/*:activity/activity22/activity22/src/main/resources" "com.gdb.tests.TestJdbcConnection" "activity/activity22/activity22/lib/*"
 
 
 
@@ -514,6 +535,17 @@ Enter your choice:
 
 ---
 
+### 🗄️ Activity 22 — JDBC Foundation (Connection Management & Schema DDL)
+- **Directory:** `activity/activity22/activity22/`
+- **Key Concepts:**
+  - **Connection Provider Abstraction:** `ConnectionProvider` interface standardizes connection lifecycle and disposal, implemented by `JdbcConnectionProvider` connecting to SQLite via `DriverManager`.
+  - **Automated Schema Migration:** `SchemaInitializer` reads and executes DDL statements from `schema.sql` idempotently on startup.
+  - **Relational Tables:** Creates `accounts` (with constraints, types, and primary key) and `transactions` (with foreign key referencing `accounts`).
+  - **Configurable Database Mode:** `RepositoryFactory` configures JDBC connection properties (`persistence.db.url`, `persistence.db.driver`) and initializes database schema before repository operations.
+- **Test Class:** `com.gdb.tests.TestJdbcConnection`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -530,6 +562,8 @@ Enter your choice:
 | **Application Service Orchestrator** | `AccountService` | Unifies domain operations and infrastructure logging behind a clean transactional facade. |
 | **Presentation / CLI View Pattern** | `AccountUI` | Decouples terminal I/O and user interaction from core domain and service logic. |
 | **Repository Pattern** | `AccountRepository` + `TransactionRepository` | Completely abstracts data access and storage mechanisms from business services and domain logic. |
+| **Provider Pattern** | `ConnectionProvider` + `JdbcConnectionProvider` | Decouples physical JDBC connection management and lifecycle from consumer repositories. |
+| **Schema Migration / Initializer** | `SchemaInitializer` + `schema.sql` | Idempotently creates and prepares relational database tables and foreign keys upon startup. |
 
 ---
 
