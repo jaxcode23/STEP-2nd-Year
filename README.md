@@ -53,7 +53,8 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `c41f459` | `feat(activity14): complete Activity 14 external properties rules engine` | **Activity 14** | External `.properties` file loader, configuration externalization, and runtime hot reload |
 | `bf6fab1` | `feat(activity15): complete Activity 15 funds transfer with daily limits` | **Activity 15** | Transactional `TransferService`, daily transfer limit tracking, and atomic rollback |
 | `5eaab79` | `chore: isolate activity modules with Eclipse and VS Code project configuration` | **Tooling** | Eclipse `.project` / `.classpath` metadata and VS Code workspace configuration |
-| `HEAD` | `feat(activity16): complete Activity 16 transaction model and audit records` | **Activity 16** | Immutable `Transaction` model, `TransactionType` enum, and overloaded audit methods |
+| `f39c9c9` | `feat(activity16): complete Activity 16 transaction model and audit records` | **Activity 16** | Immutable `Transaction` model, `TransactionType` enum, and overloaded audit methods |
+| `HEAD` | `feat(activity17): complete Activity 17 command pattern and file logging` | **Activity 17** | Command Pattern (`TransactionCommand`), serialized audit log (`TransactionLog`) |
 
 ---
 
@@ -156,7 +157,7 @@ STEP-2nd-Year/
         ├── src/com/gdb/tests/TestTransfer.java # Transfer, limits & rollback test suite
         └── src/com/gdb/tests/TestAccountRulesEngineProperties.java
     │
-    └── activity16/activity16/                # Activity 16: Transaction Model
+    ├── activity16/activity16/                # Activity 16: Transaction Model
         ├── docs/ACTIVITY_16.md               # Activity 16 specification
         ├── src/main/resources/config/rules/  # Properties configuration files
         ├── src/com/gdb/domain/Transaction.java # Immutable transaction audit record
@@ -164,6 +165,12 @@ STEP-2nd-Year/
         ├── src/com/gdb/domain/Account.java   # depositWithTransaction & withdrawWithTransaction
         ├── src/com/gdb/service/TransferService.java # transferWithTransaction
         └── src/com/gdb/tests/TestTransactionModel.java # Transaction model test suite
+    │
+    └── activity17/activity17/                # Activity 17: Command Pattern + File Logging
+        ├── docs/ACTIVITY_17.md               # Activity 17 specification
+        ├── src/com/gdb/command/              # Command hierarchy (Deposit, Withdraw, Transfer)
+        ├── src/com/gdb/logging/TransactionLog.java # ObjectOutputStream binary file logger
+        └── src/com/gdb/tests/TestCommandLogging.java # Replay & persistence verification suite
 ```
 
 ---
@@ -207,7 +214,8 @@ $activities = @(
     @{ Name="Activity 13.2"; Src="activity/activity13/activity13/13.2/src"; Bin="activity/activity13/activity13/13.2/bin"; Main="com.gdb.tests.TestAccountRulesEngine" },
     @{ Name="Activity 14"; Src="activity/activity14/activity14/src"; Bin="activity/activity14/activity14/bin"; CP="activity/activity14/activity14/bin;activity/activity14/activity14"; Main="com.gdb.tests.TestAccountRulesEngineProperties" },
     @{ Name="Activity 15"; Src="activity/activity15/activity15/src"; Bin="activity/activity15/activity15/bin"; CP="activity/activity15/activity15/bin;activity/activity15/activity15"; Main="com.gdb.tests.TestTransfer" },
-    @{ Name="Activity 16"; Src="activity/activity16/activity16/src"; Bin="activity/activity16/activity16/bin"; CP="activity/activity16/activity16/bin;activity/activity16/activity16"; Main="com.gdb.tests.TestTransactionModel" }
+    @{ Name="Activity 16"; Src="activity/activity16/activity16/src"; Bin="activity/activity16/activity16/bin"; CP="activity/activity16/activity16/bin;activity/activity16/activity16"; Main="com.gdb.tests.TestTransactionModel" },
+    @{ Name="Activity 17"; Src="activity/activity17/activity17/src"; Bin="activity/activity17/activity17/bin"; CP="activity/activity17/activity17/bin;activity/activity17/activity17"; Main="com.gdb.tests.TestCommandLogging" }
 )
 
 foreach ($act in $activities) {
@@ -252,6 +260,8 @@ compile_and_run "Activity 13.2" "activity/activity13/activity13/13.2/src" "activ
 compile_and_run "Activity 14" "activity/activity14/activity14/src" "activity/activity14/activity14/bin" "activity/activity14/activity14/bin:activity/activity14/activity14" "com.gdb.tests.TestAccountRulesEngineProperties"
 compile_and_run "Activity 15" "activity/activity15/activity15/src" "activity/activity15/activity15/bin" "activity/activity15/activity15/bin:activity/activity15/activity15" "com.gdb.tests.TestTransfer"
 compile_and_run "Activity 16" "activity/activity16/activity16/src" "activity/activity16/activity16/bin" "activity/activity16/activity16/bin:activity/activity16/activity16" "com.gdb.tests.TestTransactionModel"
+compile_and_run "Activity 17" "activity/activity17/activity17/src" "activity/activity17/activity17/bin" "activity/activity17/activity17/bin:activity/activity17/activity17" "com.gdb.tests.TestCommandLogging"
+
 
 ```
 
@@ -408,6 +418,16 @@ Enter your choice:
 
 ---
 
+### ⚡ Activity 17 — Command Pattern + File Logging
+- **Directory:** `activity/activity17/activity17/`
+- **Key Concepts:**
+  - **Command Pattern Hierarchy:** Encapsulates operations in `DepositCommand`, `WithdrawCommand`, and `TransferCommand` implementing `TransactionCommand`.
+  - `TransactionLog`: Appends executed commands to `data/transactions.ser` using Java native object serialization (`ObjectOutputStream` and custom `AppendableObjectOutputStream` avoiding corrupted headers).
+  - **Command Replay & Deserialization:** Reads back persisted audit logs until `EOFException` and reconstructs historical timeline.
+- **Test Class:** `com.gdb.tests.TestCommandLogging`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -419,6 +439,7 @@ Enter your choice:
 | **Externalized Configuration** | `.properties` files + `AccountRulesPropertiesLoader` | Allows business teams to alter banking policy and limits without source code modifications. |
 | **Service Layer Pattern** | `TransferService` | Encapsulates multi-entity transactional workflows (atomic transfer, audit logging, rollback recovery). |
 | **Audit Log / Value Object Pattern** | `Transaction` + `TransactionType` | Captures immutable historical snapshots of financial operations for compliance and reconciliation. |
+| **Command Pattern** | `TransactionCommand`, `DepositCommand`, etc. | Encapsulates financial operations as standalone executable objects enabling replay, undo, and decoupled logging. |
 
 ---
 
