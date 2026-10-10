@@ -74,19 +74,16 @@ STEP-2nd-Year/
 ├── .gitignore                                # Git ignore configuration
 ├── .vscode/                                  # VS Code workspace settings and launch profiles
 │
-├── code/                                     # Interactive Standalone Banking Console Application
-│   ├── Account.java                          # Baseline procedural Account class
-│   ├── AccountEnhanced.java                  # Enhanced Account model
-│   ├── AccountException.java                 # Base exception
-│   ├── InsufficientBalanceException.java     # Overdraw exception
-│   ├── MinimumBalanceViolationException.java # Minimum balance exception
-│   ├── CurrentAccount.java                   # Current account subclass with overdraft
-│   ├── SavingsAccount.java                   # Savings account subclass with interest
-│   ├── SalaryAccount.java                    # Zero-balance salary account
-│   ├── FixedDepositAccount.java              # Term deposit account
-│   ├── TestAccount.java                      # Interactive CLI terminal menu (Deposit/Withdraw/Create)
-│   ├── TestAccountEnhanced.java              # Enhanced test driver
-│   └── TestAccountSubclasses.java            # Subclass test driver
+├── code/                                     # Global Digital Bank (GDB) Enterprise Core Application
+│   ├── src/                                  # Enterprise modular source tree
+│   │   ├── com/gdb/                          # Domain, service, repository, command, bridge, ui
+│   │   └── main/resources/                   # External properties configuration & SQLite schema DDL
+│   ├── lib/                                  # SQLite JDBC & logging libraries
+│   ├── docs/                                 # Architecture documentation & lab specification word docs
+│   ├── legacy/                               # Baseline procedural account implementations (reference)
+│   ├── README.md                             # Application documentation & execution guide
+│   ├── .classpath                            # Eclipse & VS Code Java configuration
+│   └── .project                              # Eclipse project metadata
 │
 └── activity/                                 # Progressive Learning Activities (Isolated Modules)
     ├── activity6/activity6/                  # Activity 6: Exception Handling Suite
