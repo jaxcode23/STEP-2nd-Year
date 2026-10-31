@@ -1,69 +1,59 @@
 package com.gdb.repository;
 
 import com.gdb.domain.Transaction;
+import com.gdb.domain.TransactionType;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * In-memory implementation of TransactionRepository backed by a List.
- */
 public class InMemoryTransactionRepository implements TransactionRepository {
 
-    // ============================================================
-    // 📝 STEP 9: Declare Fields
-    //
-    // INSTRUCTIONS:
-    //   Declare a private final List<Transaction> transactions = new ArrayList<>()
-    // ============================================================
     private final List<Transaction> transactions = new ArrayList<>();
 
-    // ============================================================
-    // 📝 STEP 10: Implement save(Transaction transaction)
-    //
-    // INSTRUCTIONS:
-    //   Append the transaction to the list if not null.
-    // ============================================================
+    public InMemoryTransactionRepository() {
+    }
+
     @Override
-    public void save(Transaction transaction) {
+    public synchronized void save(Transaction transaction) {
         if (transaction != null) {
             transactions.add(transaction);
         }
     }
 
-    // ============================================================
-    // 📝 STEP 11: Implement findByAccount(int accountNumber)
-    //
-    // INSTRUCTIONS:
-    //   Filter and return transactions matching accountNumber (or from/to account).
-    // ============================================================
     @Override
-    public List<Transaction> findByAccount(int accountNumber) {
+    public synchronized List<Transaction> findByAccount(int accountNumber) {
         return transactions.stream()
-                .filter(t -> t.getAccountNumber() == accountNumber
-                          || t.getFromAccount() == accountNumber
-                          || t.getToAccount() == accountNumber)
+                .filter(t -> t.getAccountNumber() == accountNumber || 
+                             t.getFromAccount() == accountNumber || 
+                             t.getToAccount() == accountNumber)
                 .collect(Collectors.toList());
     }
 
-    // ============================================================
-    // 📝 STEP 12: Implement findAll()
-    //
-    // INSTRUCTIONS:
-    //   Return a copy of all stored transactions.
-    // ============================================================
     @Override
-    public List<Transaction> findAll() {
+    public synchronized List<Transaction> findAll() {
         return new ArrayList<>(transactions);
     }
 
-    // ============================================================
-    // 📝 STEP 13: Implement clear()
-    //
-    // INSTRUCTIONS:
-    //   Clear all transactions from the list.
-    // ============================================================
     @Override
-    public void clear() {
+    public synchronized void clear() {
         transactions.clear();
+    }
+
+    @Override
+    public synchronized void transfer(int fromAccountNumber, int toAccountNumber, double amount) {
+        Transaction txn = new Transaction(
+                Transaction.generateId(),
+                LocalDateTime.now(),
+                fromAccountNumber,
+                TransactionType.TRANSFER,
+                amount,
+                0.0,
+                "SUCCESS",
+                "Transfer to Account #" + toAccountNumber,
+                fromAccountNumber,
+                toAccountNumber
+        );
+        save(txn);
     }
 }
