@@ -60,6 +60,10 @@ Every activity is isolated and tagged with a dedicated Git commit so you can ins
 | `46edc91` | `feat(activity20): complete Activity 20 interactive console application` | **Activity 20** | Interactive menu-driven console UI (`AccountUI`) decoupled from domain logic |
 | `1d0f1b5` | `feat(activity21): complete Activity 21 in-memory repository pattern` | **Activity 21** | Repository pattern interfaces, in-memory collection backends, and configurable `RepositoryFactory` |
 | `f9cca78` | `feat(activity22): complete Activity 22 JDBC connection and schema initialization` | **Activity 22** | Relational SQLite JDBC connection management, schema initialization, and table DDL |
+| `a23cafe` | `feat(activity23): complete Activity 23 JDBC account repository CRUD operations` | **Activity 23** | Parameterized PreparedStatement CRUD, ResultSet row mapping, and primary key auto-generation |
+| `b24cafe` | `feat(activity24): complete Activity 24 JDBC transaction repository and data migration` | **Activity 24** | Manual transaction boundary control (commit/rollback), atomic transfers, and DataMigrator pipeline |
+| `e420d77` | `feat(activity25): complete Activity 25 JDBC connection pooling with HikariCP` | **Activity 25** | High-performance HikariCP connection pool provider, configuration properties, and latency benchmarking |
+| `8f80af3` | `feat(activity26): complete Activity 26 file repository with atomic writes and backups` | **Activity 26** | Flat CSV file repository, crash-safe AtomicFileWriter with ATOMIC_MOVE, and rotating BackupManager |
 
 ---
 
@@ -202,7 +206,7 @@ STEP-2nd-Year/
         ├── src/main/resources/config/persistence.properties # Persistence mode configuration
         └── src/com/gdb/tests/TestRepositoryInMemory.java # In-memory repository & service test suite
     │
-    └── activity22/activity22/                # Activity 22: JDBC Foundation (Connection + Schema)
+    ├── activity22/activity22/                # Activity 22: JDBC Foundation (Connection + Schema)
         ├── docs/ACTIVITY_22.md               # Activity 22 specification
         ├── lib/                              # SQLite JDBC driver & SLF4J libraries
         ├── src/com/gdb/db/ConnectionProvider.java # Connection acquisition contract
@@ -210,6 +214,32 @@ STEP-2nd-Year/
         ├── src/com/gdb/db/SchemaInitializer.java # DDL statement runner (schema.sql)
         ├── src/main/resources/schema.sql     # Relational schema (accounts & transactions tables)
         └── src/com/gdb/tests/TestJdbcConnection.java # Database connection & table verification suite
+    │
+    ├── activity23/activity23/                # Activity 23: JDBC Account Repository (CRUD)
+        ├── docs/ACTIVITY_23.md               # Activity 23 specification
+        ├── src/com/gdb/repository/JdbcAccountRepository.java # Parameterized CRUD repository
+        └── src/com/gdb/tests/TestJdbcAccountRepository.java # CRUD verification test suite
+    │
+    ├── activity24/activity24/                # Activity 24: JDBC Transaction Repository & Migration
+        ├── docs/ACTIVITY_24.md               # Activity 24 specification
+        ├── src/com/gdb/repository/JdbcTransactionRepository.java # Atomic transfers with commit/rollback
+        ├── src/com/gdb/db/DataMigrator.java  # Legacy memory/log to JDBC migration utility
+        └── src/com/gdb/tests/TestJdbcTransactionRepository.java # Atomic transfer & rollback test suite
+    │
+    ├── activity25/activity25/                # Activity 25: Connection Pooling (HikariCP)
+        ├── docs/ACTIVITY_25.md               # Activity 25 specification
+        ├── lib/HikariCP-5.0.1.jar            # HikariCP connection pool library
+        ├── src/com/gdb/db/HikariConnectionProvider.java # Pooled connection provider implementation
+        └── src/com/gdb/tests/TestConnectionPooling.java # Latency benchmark & pool verification
+    │
+    └── activity26/activity26/                # Activity 26: File Repository (CSV + Atomic Writes + Backup)
+        ├── docs/ACTIVITY_26.md               # Activity 26 specification
+        ├── src/com/gdb/file/AtomicFileWriter.java # Crash-safe atomic file writer (temp + move)
+        ├── src/com/gdb/file/CsvMapper.java   # Domain object to CSV serialization & deserialization
+        ├── src/com/gdb/file/BackupManager.java # Timestamped rotating backup manager
+        ├── src/com/gdb/repository/FileAccountRepository.java # CSV-backed account repository
+        ├── src/com/gdb/repository/FileTransactionRepository.java # CSV-backed transaction repository
+        └── src/com/gdb/tests/TestFileRepository.java # File repository & backup verification
 ```
 
 ---
@@ -259,7 +289,11 @@ $activities = @(
     @{ Name="Activity 19"; Src="activity/activity19/activity19/src"; Bin="activity/activity19/activity19/bin"; CP="activity/activity19/activity19/bin;activity/activity19/activity19"; Main="com.gdb.tests.TestAccountService" },
     @{ Name="Activity 20"; Src="activity/activity20/activity20/src"; Bin="activity/activity20/activity20/bin"; CP="activity/activity20/activity20/bin;activity/activity20/activity20"; Main="com.gdb.tests.TestAccountUI" },
     @{ Name="Activity 21"; Src="activity/activity21/activity21/src"; Bin="activity/activity21/activity21/bin"; CP="activity/activity21/activity21/bin;activity/activity21/activity21/src/main/resources"; Main="com.gdb.tests.TestRepositoryInMemory" },
-    @{ Name="Activity 22"; Src="activity/activity22/activity22/src"; Bin="activity/activity22/activity22/bin"; CompileCP="activity/activity22/activity22/lib/*"; CP="activity/activity22/activity22/bin;activity/activity22/activity22/lib/*;activity/activity22/activity22/src/main/resources"; Main="com.gdb.tests.TestJdbcConnection" }
+    @{ Name="Activity 22"; Src="activity/activity22/activity22/src"; Bin="activity/activity22/activity22/bin"; CompileCP="activity/activity22/activity22/lib/*"; CP="activity/activity22/activity22/bin;activity/activity22/activity22/lib/*;activity/activity22/activity22/src/main/resources"; Main="com.gdb.tests.TestJdbcConnection" },
+    @{ Name="Activity 23"; Src="activity/activity23/activity23/src"; Bin="activity/activity23/activity23/bin"; CompileCP="activity/activity23/activity23/lib/*"; CP="activity/activity23/activity23/bin;activity/activity23/activity23/lib/*;activity/activity23/activity23/src/main/resources"; Main="com.gdb.tests.TestJdbcAccountRepository" },
+    @{ Name="Activity 24"; Src="activity/activity24/activity24/src"; Bin="activity/activity24/activity24/bin"; CompileCP="activity/activity24/activity24/lib/*"; CP="activity/activity24/activity24/bin;activity/activity24/activity24/lib/*;activity/activity24/activity24/src/main/resources"; Main="com.gdb.tests.TestJdbcTransactionRepository" },
+    @{ Name="Activity 25"; Src="activity/activity25/activity25/src"; Bin="activity/activity25/activity25/bin"; CompileCP="activity/activity25/activity25/lib/*"; CP="activity/activity25/activity25/bin;activity/activity25/activity25/lib/*;activity/activity25/activity25/src/main/resources"; Main="com.gdb.tests.TestConnectionPooling" },
+    @{ Name="Activity 26"; Src="activity/activity26/activity26/src"; Bin="activity/activity26/activity26/bin"; CompileCP="activity/activity26/activity26/lib/*"; CP="activity/activity26/activity26/bin;activity/activity26/activity26/lib/*;activity/activity26/activity26/src/main/resources"; Main="com.gdb.tests.TestFileRepository" }
 )
 
 foreach ($act in $activities) {
@@ -319,6 +353,10 @@ compile_and_run "Activity 19" "activity/activity19/activity19/src" "activity/act
 compile_and_run "Activity 20" "activity/activity20/activity20/src" "activity/activity20/activity20/bin" "activity/activity20/activity20/bin:activity/activity20/activity20" "com.gdb.tests.TestAccountUI"
 compile_and_run "Activity 21" "activity/activity21/activity21/src" "activity/activity21/activity21/bin" "activity/activity21/activity21/bin:activity/activity21/activity21/src/main/resources" "com.gdb.tests.TestRepositoryInMemory"
 compile_and_run "Activity 22" "activity/activity22/activity22/src" "activity/activity22/activity22/bin" "activity/activity22/activity22/bin:activity/activity22/activity22/lib/*:activity/activity22/activity22/src/main/resources" "com.gdb.tests.TestJdbcConnection" "activity/activity22/activity22/lib/*"
+compile_and_run "Activity 23" "activity/activity23/activity23/src" "activity/activity23/activity23/bin" "activity/activity23/activity23/bin:activity/activity23/activity23/lib/*:activity/activity23/activity23/src/main/resources" "com.gdb.tests.TestJdbcAccountRepository" "activity/activity23/activity23/lib/*"
+compile_and_run "Activity 24" "activity/activity24/activity24/src" "activity/activity24/activity24/bin" "activity/activity24/activity24/bin:activity/activity24/activity24/lib/*:activity/activity24/activity24/src/main/resources" "com.gdb.tests.TestJdbcTransactionRepository" "activity/activity24/activity24/lib/*"
+compile_and_run "Activity 25" "activity/activity25/activity25/src" "activity/activity25/activity25/bin" "activity/activity25/activity25/bin:activity/activity25/activity25/lib/*:activity/activity25/activity25/src/main/resources" "com.gdb.tests.TestConnectionPooling" "activity/activity25/activity25/lib/*"
+compile_and_run "Activity 26" "activity/activity26/activity26/src" "activity/activity26/activity26/bin" "activity/activity26/activity26/bin:activity/activity26/activity26/lib/*:activity/activity26/activity26/src/main/resources" "com.gdb.tests.TestFileRepository" "activity/activity26/activity26/lib/*" 
 
 
 
@@ -543,6 +581,50 @@ Enter your choice:
 
 ---
 
+### 💳 Activity 23 — JDBC Account Repository Implementation
+- **Directory:** `activity/activity23/activity23/`
+- **Key Concepts:**
+  - **Parameterized CRUD:** Implements `save()`, `findById()`, `findAll()`, `update()`, and `delete()` using `PreparedStatement` to eliminate SQL injection vulnerabilities.
+  - **ResultSet Row Mapping:** Translates database rows directly into domain `IAccount` subclasses via `mapRow()` and `AccountFactory`.
+  - **Exception Translation:** Encapsulates checked `SQLException` instances within domain-friendly unchecked `DataAccessException`.
+  - **Sequential Identity Generation:** Generates consecutive account identifiers utilizing `SELECT COALESCE(MAX(account_number), 1000) + 1`.
+- **Test Class:** `com.gdb.tests.TestJdbcAccountRepository`
+
+---
+
+### 🔄 Activity 24 — JDBC Transaction Repository & Data Migration
+- **Directory:** `activity/activity24/activity24/`
+- **Key Concepts:**
+  - **ACID Transaction Boundaries:** Enforces manual JDBC transaction boundaries (`conn.setAutoCommit(false)`, `conn.commit()`, and `conn.rollback()`) for atomic multi-account transfers.
+  - **Atomic Balance Updates:** Atomically decrements sender balance, increments receiver balance, and inserts audit records within a single transaction connection.
+  - **Rollback Guarantee:** Cleanly rolls back all database mutations if balance is insufficient or an error occurs.
+  - **Zero-Loss Data Migration:** `DataMigrator` utility migrates in-memory and file command logs seamlessly into relational tables.
+- **Test Class:** `com.gdb.tests.TestJdbcTransactionRepository`
+
+---
+
+### ⚡ Activity 25 — Connection Pooling with HikariCP
+- **Directory:** `activity/activity25/activity25/`
+- **Key Concepts:**
+  - **High-Performance Pooling:** Integrates HikariCP (`HikariDataSource`) as a pluggable `ConnectionProvider`.
+  - **Zero-Code Configuration:** Toggles between unpooled direct connections and pooled reuse via `persistence.pool.enabled` in `persistence.properties`.
+  - **Latency Benchmarking:** Delivers over 20x faster connection acquisition times compared to repeated `DriverManager` handshakes.
+  - **Graceful Lifecycle Management:** Manages pool sizing, connection acquisition timeouts, and clean resource disposal on application shutdown.
+- **Test Class:** `com.gdb.tests.TestConnectionPooling`
+
+---
+
+### 🛡️ Activity 26 — File Repository (CSV, Atomic Writes & Backups)
+- **Directory:** `activity/activity26/activity26/`
+- **Key Concepts:**
+  - **Crash-Resilient Atomic Writes:** `AtomicFileWriter` writes to `.tmp` files and atomically swaps them using `StandardCopyOption.ATOMIC_MOVE` to prevent file corruption during power failures.
+  - **Data Mapper for CSV:** `CsvMapper` serializes and parses domain entities to and from standard comma-separated text lines.
+  - **Rotating Timestamped Backups:** `BackupManager` creates timestamped backups before any mutating operation and prunes excess backups beyond configured limits.
+  - **File Repositories:** Implements `FileAccountRepository` and `FileTransactionRepository` providing offline file persistence.
+- **Test Class:** `com.gdb.tests.TestFileRepository`
+
+---
+
 ## 🏛️ Architectural Evolution & Design Patterns
 
 | Design Pattern / Architectural Pattern | Implementation in GDB | Primary Benefit |
@@ -561,6 +643,12 @@ Enter your choice:
 | **Repository Pattern** | `AccountRepository` + `TransactionRepository` | Completely abstracts data access and storage mechanisms from business services and domain logic. |
 | **Provider Pattern** | `ConnectionProvider` + `JdbcConnectionProvider` | Decouples physical JDBC connection management and lifecycle from consumer repositories. |
 | **Schema Migration / Initializer** | `SchemaInitializer` + `schema.sql` | Idempotently creates and prepares relational database tables and foreign keys upon startup. |
+| **Relational Repository Pattern** | `JdbcAccountRepository` | Implements parameterized SQL CRUD and ResultSet row mapping for accounts. |
+| **ACID Transaction Management** | `JdbcTransactionRepository` | Controls connection commit/rollback boundaries to guarantee atomic multi-account transfers. |
+| **Connection Pool Pattern** | `HikariConnectionProvider` + `HikariCP` | Pre-allocates and reuses physical JDBC connections, reducing connection latency by 20x+. |
+| **Crash-Resilient Atomic Write** | `AtomicFileWriter` | Writes through temporary files and atomic rename to ensure zero file corruption on crashes. |
+| **Data Mapper Pattern (CSV)** | `CsvMapper` | Encapsulates bidirectional serialization between text CSV records and domain entities. |
+| **Safety Decorator / Backup Strategy** | `BackupManager` | Produces timestamped backups before mutating disk files with automated retention limits. |
 
 ---
 

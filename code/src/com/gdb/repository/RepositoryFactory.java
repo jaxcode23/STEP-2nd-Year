@@ -1,6 +1,7 @@
 package com.gdb.repository;
 
 import com.gdb.db.ConnectionProvider;
+import com.gdb.db.HikariConnectionProvider;
 import com.gdb.db.JdbcConnectionProvider;
 import com.gdb.db.SchemaInitializer;
 
@@ -40,23 +41,17 @@ public class RepositoryFactory {
         return loadPersistenceProperties().getProperty("persistence.mode", "memory").trim().toLowerCase();
     }
 
-    // ============================================================
-    // 📝 STEP 7: Implement getConnectionProvider()
-    //
-    // INSTRUCTIONS:
-    //   1. If connectionProviderInstance is null:
-    //      - Read url from "persistence.db.url" (default "jdbc:sqlite:gdb.db")
-    //      - Read driver from "persistence.db.driver" (default "org.sqlite.JDBC")
-    //      - Instantiate JdbcConnectionProvider(url, driver)
-    //      - Call SchemaInitializer.initialize(connectionProviderInstance)
-    //   2. Return connectionProviderInstance.
-    // ============================================================
     public static synchronized ConnectionProvider getConnectionProvider() {
         if (connectionProviderInstance == null) {
             Properties props = loadPersistenceProperties();
-            String url = props.getProperty("persistence.db.url", "jdbc:sqlite:gdb.db").trim();
-            String driver = props.getProperty("persistence.db.driver", "org.sqlite.JDBC").trim();
-            connectionProviderInstance = new JdbcConnectionProvider(url, driver);
+            boolean poolEnabled = Boolean.parseBoolean(props.getProperty("persistence.pool.enabled", "false"));
+            if (poolEnabled) {
+                connectionProviderInstance = new HikariConnectionProvider(props);
+            } else {
+                String url = props.getProperty("persistence.db.url", "jdbc:sqlite:gdb.db");
+                String driver = props.getProperty("persistence.db.driver", "org.sqlite.JDBC");
+                connectionProviderInstance = new JdbcConnectionProvider(url, driver);
+            }
             SchemaInitializer.initialize(connectionProviderInstance);
         }
         return connectionProviderInstance;
@@ -64,14 +59,17 @@ public class RepositoryFactory {
 
     public static synchronized AccountRepository getAccountRepository() {
         if (accountRepositoryInstance == null) {
+            Properties props = loadPersistenceProperties();
             String mode = getPersistenceMode();
             if ("memory".equals(mode)) {
                 accountRepositoryInstance = new InMemoryAccountRepository();
             } else if ("jdbc".equals(mode)) {
-                // Connection provider initialized
-                getConnectionProvider();
-                // Placeholder for Activity 23 JdbcAccountRepository
-                throw new UnsupportedOperationException("JdbcAccountRepository will be implemented in Activity 23. Use memory mode or TestJdbcConnection for Activity 22.");
+                accountRepositoryInstance = new JdbcAccountRepository(getConnectionProvider());
+            } else if ("file".equals(mode)) {
+                String path = props.getProperty("persistence.file.account.path", "data/accounts.csv");
+                boolean backup = Boolean.parseBoolean(props.getProperty("persistence.file.backup.enabled", "true"));
+                int maxBackup = Integer.parseInt(props.getProperty("persistence.file.backup.max", "5"));
+                accountRepositoryInstance = new FileAccountRepository(path, backup, maxBackup);
             } else {
                 accountRepositoryInstance = new InMemoryAccountRepository();
             }
@@ -81,13 +79,17 @@ public class RepositoryFactory {
 
     public static synchronized TransactionRepository getTransactionRepository() {
         if (transactionRepositoryInstance == null) {
+            Properties props = loadPersistenceProperties();
             String mode = getPersistenceMode();
             if ("memory".equals(mode)) {
                 transactionRepositoryInstance = new InMemoryTransactionRepository();
             } else if ("jdbc".equals(mode)) {
-                getConnectionProvider();
-                // Placeholder for Activity 24 JdbcTransactionRepository
-                throw new UnsupportedOperationException("JdbcTransactionRepository will be implemented in Activity 24. Use memory mode or TestJdbcConnection for Activity 22.");
+                transactionRepositoryInstance = new JdbcTransactionRepository(getConnectionProvider());
+            } else if ("file".equals(mode)) {
+                String path = props.getProperty("persistence.file.transaction.path", "data/transactions.csv");
+                boolean backup = Boolean.parseBoolean(props.getProperty("persistence.file.backup.enabled", "true"));
+                int maxBackup = Integer.parseInt(props.getProperty("persistence.file.backup.max", "5"));
+                transactionRepositoryInstance = new FileTransactionRepository(path, backup, maxBackup);
             } else {
                 transactionRepositoryInstance = new InMemoryTransactionRepository();
             }
